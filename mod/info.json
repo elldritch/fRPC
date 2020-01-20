@@ -4,5 +4,7 @@
   "title": "fRPC",
   "author": "liftM",
   "homepage": "https://github.com/liftM/fRPC",
-  "description": "Monitor and control Factorio over HTTP."
+  "description": "Monitor and control Factorio over HTTP.",
+  "factorio_version": "0.17",
+  "dependencies": ["base >= 0.17"]
 }

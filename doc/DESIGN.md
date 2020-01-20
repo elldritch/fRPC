@@ -12,12 +12,12 @@ Sensors provide an HTTP interface for metrics exported from within Factorio.
 
 ### User interface
 
-Within Factorio, sensors are assigned a UUID when they're created. Players can also assign a human-friendly name string to the sensor. Names must be unique.
+Within Factorio, sensors are identified by the ID of the circuit network to which they are connected.
 
 Externally, the HTTP API provides these routes:
 
 ```
-# List basic information about sensors, including a map of sensor names to IDs.
+# List basic information about sensors.
 GET /sensors
 
 # List detailed information about a sensor's current values.
@@ -26,23 +26,28 @@ GET /sensors/:sensor/values
 
 ### Implementation
 
-Within Factorio, fRPC uses [`game.write_file`](https://lua-api.factorio.com/0.17.79/LuaGameScript.html#LuaGameScript.write_file) to write the circuit network values of each sensor to a JSON log file once per second. These files are named `fRPC_log_$TIMESTAMP.json`, where `$TIMESTAMP` is the timestamp at which the sensor values were sampled truncated to second resolution.
+Within Factorio, fRPC uses [`game.write_file`](https://lua-api.factorio.com/0.17.79/LuaGameScript.html#LuaGameScript.write_file) to append the circuit network values of each sensor to a series of log files. These writes occur every tick that there is new information (up to 60 times per second).
 
-The format of these files is:
+The readings for every 60 ticks are grouped into a "bucket" and logged in the same file. This file is named `frpc_sensors_$TICK.log`, where `$TICK` is the first tick of the bucket. This is the simplest way to enable log file rotation from within Factorio.
+
+Each line in this file is a JSON value containing a sensor reading:
 
 ```typescript
-type UUID = string;
+type Line = Reading[];
 
-type File = {
-  names: {
-    [name: string]: UUID
+type Reading = {
+  tick: int;
+  network_id: int;
+  signals: Signal[];
+}
+
+type Signal = {
+  signal: {
+    type: "item" | "fluid" | "virtual";
+    name?: string;
   }
-  values: {
-    [sensor: UUID]: {
-      [channel: string]: number;
-    }
-  }
-};
+  count: int;
+}
 ```
 
-The sidecar reads these log files every second and updates the current values returned by the HTTP API. It deletes log files after reading them.
+The sidecar reads these log files and updates the current values returned by the HTTP API. It deletes old log files after reading them.
