@@ -1,0 +1,8 @@
+{
+  "name": "frpc",
+  "version": "0.0.1",
+  "title": "fRPC",
+  "author": "liftM",
+  "homepage": "https://github.com/liftM/fRPC",
+  "description": "Monitor and control Factorio over HTTP."
+}
