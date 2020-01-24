@@ -1,3 +1,17 @@
+local function deduplicate(list)
+  local unique_values = {}
+  for _, v in ipairs(list) do
+    unique_values[v] = true
+  end
+
+  local deduplicated = {}
+  for k, _ in pairs(unique_values) do
+    table.insert(deduplicated, k)
+  end
+
+  return deduplicated
+end
+
 -- NOTE: these connector IDs are actually not unique -- all are 1 except
 -- combinator_output, which is 2.
 local connector_ids = {
@@ -19,7 +33,7 @@ local connector_ids = {
   defines.circuit_connector_id.pump
 }
 
-local unique_connector_ids = {1, 2}
+local unique_connector_ids = deduplicate(connector_ids)
 
 local wire_types = {
   defines.wire_type.red,
@@ -27,7 +41,10 @@ local wire_types = {
 }
 
 script.on_nth_tick(1, function (e)
-  local values = {}
+  local sample = {
+    tick = e.tick,
+    values = {}
+  }
   for _, surface in pairs(game.surfaces) do
     local sensors = surface.find_entities_filtered({name = "frpc-sensor"})
     for _, sensor in ipairs(sensors) do
@@ -35,8 +52,7 @@ script.on_nth_tick(1, function (e)
         for _, connector_id in ipairs(unique_connector_ids) do
           local network = sensor.get_circuit_network(wire_type, connector_id)
           if network ~= nil and network.signals ~= nil then
-            table.insert(values, {
-              tick = e.tick,
+            table.insert(sample.values, {
               network_id = network.network_id,
               signals = network.signals
             })
@@ -45,7 +61,7 @@ script.on_nth_tick(1, function (e)
       end
     end
   end
-  if next(values) ~= nil then
-    game.write_file("frpc_sensors.log", game.table_to_json(values) .. "\n", true)
+  if next(sample.values) ~= nil then
+    game.write_file("frpc_sensors_".. math.floor(e.tick / 60) ..".log", game.table_to_json(sample) .. "\n", true)
   end
 end)
