@@ -1,11 +1,10 @@
 package sensors
 
 import (
-	"bufio"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -34,61 +33,50 @@ type SignalID struct {
 }
 
 func (s *Sensors) Poll(dir string) {
-	lastBucket := 0
-	lastPoll := time.Now()
-
 	for {
+		// List all log files.
 		logs, err := ioutil.ReadDir(dir)
 		if err != nil {
 			panic(err)
 		}
 
-		// Find latest log since last polled tick bucket.
-		latestBucket := lastBucket
-		for _, info := range logs {
-			bucket, err := strconv.Atoi(strings.TrimPrefix(strings.TrimSuffix(info.Name(), ".log"), "frpc_sensors_"))
+		// Sort log files in tick order.
+		sort.Slice(logs, func(i, j int) bool {
+			a, err := strconv.Atoi(strings.TrimSuffix(logs[i].Name(), ".json"))
 			if err != nil {
 				panic(err)
 			}
-			if bucket > latestBucket {
-				latestBucket = bucket
-			}
-		}
 
-		// Scan the latest log bucket only if it's changed.
-		if latestBucket != lastBucket {
-			fmt.Printf("latestBucket: %#v\n", latestBucket)
-			f, err := os.Open("frpc_sensors_" + strconv.Itoa(latestBucket) + ".log")
+			b, err := strconv.Atoi(strings.TrimSuffix(logs[j].Name(), ".json"))
 			if err != nil {
 				panic(err)
 			}
-			scanner := bufio.NewScanner(f)
-			s.mu.Lock()
-			for scanner.Scan() {
-				var sample Sample
-				err := json.Unmarshal(scanner.Bytes(), &sample)
-				if err != nil {
-					panic(err)
-				}
 
-				for _, v := range sample.Values {
-					signalMap := make(map[SignalID]int)
-					for _, signal := range v.Signals {
-						signalMap[signal.Signal] = signal.Count
-					}
+			return a < b
+		})
 
-					s.values[v.NetworkID] = Measurement{
-						MeasuredAt: sample.Tick,
-						Signals:    signalMap,
-					}
-				}
+		// For each file, record and delete.
+		for _, l := range logs {
+			bs, err := ioutil.ReadFile(l.Name())
+			if err != nil {
+				panic(err)
 			}
-			s.mu.Unlock()
+
+			var sample Sample
+			err = json.Unmarshal(bs, &sample)
+			if err != nil {
+				panic(err)
+			}
+
+			s.c <- sample
+
+			err = os.Remove(l.Name())
+			if err != nil {
+				panic(err)
+			}
 		}
 
-		// Poll at most once per second.
-		time.Sleep(time.Until(lastPoll.Add(1 * time.Second)))
-		lastPoll = time.Now()
-		lastBucket = latestBucket
+		// Poll at most once per tick.
+		time.Sleep(time.Second / 60)
 	}
 }

@@ -61,7 +61,8 @@ script.on_nth_tick(1, function (e)
       end
     end
   end
+
   if next(sample.values) ~= nil then
-    game.write_file("frpc_sensors_".. math.floor(e.tick / 60) ..".log", game.table_to_json(sample) .. "\n", true)
+    game.write_file(e.tick .. ".json", game.table_to_json(sample) .. "\n")
   end
 end)
