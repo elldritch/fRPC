@@ -77,14 +77,14 @@ func LatestTick(fs fs.Filesystem, dir string) (Tick, error) {
 //
 // Since should only be called on the mod's output directory, and relies on the
 // file naming invariants of that directory.
-func Since(fs fs.Filesystem, dir string, tick Tick, count int) ([]Sample, error) {
+func Since(fs fs.Filesystem, dir string, tick Tick, count uint) ([]Sample, error) {
 	files, err := list(fs, dir)
 	if err != nil {
 		return nil, fmt.Errorf("sensors.Since: could not read sample directory: %s", err)
 	}
 
 	// Get the first `count` files since the tick.
-	i := 0
+	var i uint
 	var since []int
 	for _, f := range files {
 		if f >= int(tick) {

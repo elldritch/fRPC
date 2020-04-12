@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/mitchellh/go-homedir"
+
+	"github.com/liftM/fRPC/sidecar/effects/clock"
+	"github.com/liftM/fRPC/sidecar/effects/fs"
 )
 
 func main() {
@@ -47,8 +51,13 @@ func main() {
 		}
 	}
 
-	// TODO: Implement server.
-	_ = dir
-	_ = addr
-	_ = ttl
+	// Implement server.
+	server := buildServer(serverConfig{
+		Clock:      clock.New(),
+		Filesystem: fs.NewDevFS(os.Stderr),
+		TTL:        time.Duration(*ttl) * time.Second,
+		Dir:        *dir,
+	})
+	fmt.Printf("Listening at address %v\n", *addr)
+	server.Start(*addr)
 }

@@ -16,14 +16,14 @@ type Count int
 
 // A Sample contains all circuit network value readings for a specific tick.
 type Sample struct {
-	Tick     Tick
-	Readings map[NetworkID]map[SignalID]Count
+	Tick     Tick                             `json:"tick"`
+	Readings map[NetworkID]map[SignalID]Count `json:"readings"`
 }
 
 // A Sensor implements functionality for reading outputs from a running fRPC
 // instance.
 type Sensor interface {
-	Since(tick Tick, count int) ([]Sample, error)
+	Since(tick Tick, count uint) ([]Sample, error)
 	LatestTick() (Tick, error)
 	DeleteExpired() error
 }

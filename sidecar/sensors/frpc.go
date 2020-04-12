@@ -1,6 +1,8 @@
 package sensors
 
 import (
+	"time"
+
 	"github.com/liftM/fRPC/sidecar/effects/fs"
 )
 
@@ -10,8 +12,8 @@ var _ Sensor = &FRPCSensor{}
 type Config struct {
 	Filesystem fs.Filesystem
 
-	Dir string // Mod output directory.
-	TTL int    // TTL of sensor data in seconds.
+	Dir string        // Mod output directory.
+	TTL time.Duration // TTL of sensor data.
 }
 
 // An FRPCSensor provides a Sensor implementation.
@@ -24,16 +26,20 @@ func New(config Config) *FRPCSensor {
 	return &FRPCSensor{config: config}
 }
 
-func (s *FRPCSensor) Since(tick Tick, count int) ([]Sample, error) {
+// Since delegates to sensors.Since.
+func (s *FRPCSensor) Since(tick Tick, count uint) ([]Sample, error) {
 	return Since(s.config.Filesystem, s.config.Dir, tick, count)
 }
 
+// LatestTick delegates to sensors.LatestTick.
 func (s *FRPCSensor) LatestTick() (Tick, error) {
 	return LatestTick(s.config.Filesystem, s.config.Dir)
 }
 
+// DeleteExpired calls sensors.Expired to determine the expired samples, and
+// then delegates to the underlying filesystem to delete them.
 func (s *FRPCSensor) DeleteExpired() error {
-	expired, err := Expired(s.config.Filesystem, s.config.Dir, s.config.TTL*60)
+	expired, err := Expired(s.config.Filesystem, s.config.Dir, ToTicks(s.config.TTL))
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,6 @@ package fs
 import (
 	"fmt"
 	"io"
-	"os"
 )
 
 var _ Filesystem = &DevFS{}
@@ -33,12 +32,12 @@ func (fs *DevFS) Read(filename string) ([]byte, error) {
 // Delete logs a message.
 func (fs *DevFS) Delete(filename string) error {
 	fmt.Fprintf(fs.writer, "Deleting file: %#v\n", filename)
-	info, err := os.Stat(filename)
-	if err != nil {
-		fmt.Fprintf(fs.writer, "Actual underlying file returned error on os.Stat: %#v\n", err)
-	} else {
-		fmt.Fprintf(fs.writer, "Actual underlying file: %#v\n", info)
-	}
+	// info, err := os.Stat(filename)
+	// if err != nil {
+	// 	fmt.Fprintf(fs.writer, "Actual underlying file returned error on os.Stat: %#v\n", err)
+	// } else {
+	// 	fmt.Fprintf(fs.writer, "Actual underlying file: %#v\n", info)
+	// }
 
 	return nil
 }

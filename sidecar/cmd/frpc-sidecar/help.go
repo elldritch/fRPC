@@ -75,7 +75,7 @@ GET /samples?since=tick&count=integer
 		// the requested interval.
 		"missing": {
 			"start": 123,
-			"end": 125
+			"end": 126
 		}
 
 		// The actual samples, up to a maximum of "count".
@@ -84,34 +84,15 @@ GET /samples?since=tick&count=integer
 			"tick": 126,
 
 			// The values of each circuit network in this sample.
-			"values": [{
-				"network_id": 6,
-				"signals": [
-					{
-						"signal": {
-							"type": "item",
-							"name": "copper-ore"
-						},
-						"count": 4
-					}
-					// Additional signals on this network...
-				]
-			}, {
-				"network_id": 4,
-				"signals": [
-					{
-						"signal": {
-							"type": "item",
-							"name": "copper-plate"
-						},
-						"count": 1
-					}
-				]
+			"readings": {
+				// A map of circuit network ID to signals.
+				6: {
+					"copper-ore": 4
+				},
+				4: {
+					"copper-plate": 1
+				}
 			}
-			// Additional circuit networks connected to sensors...
-			]
-		}
-		// Additional samples...
-		]
+		}]
 	}
 `, "\t", "  ")) + "\n"
