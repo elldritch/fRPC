@@ -4,7 +4,12 @@ sensor.name = "frpc-sensor"
 sensor.minable.result = "frpc-sensor"
 
 data:extend({
+  -- Entity.
+  -- TODO: add custom icon.
   sensor,
+
+  -- Item.
+  -- TODO: add custom icon.
   {
     type = "item",
     name = "frpc-sensor",
@@ -13,6 +18,11 @@ data:extend({
     place_result = "frpc-sensor",
     subgroup = "circuit-network",
     order = "s",
-    stack_size = 50,
+    stack_size = 10,
   }
+
+  -- TODO: Recipe.
+
+
+  -- TODO: Technology.
 })

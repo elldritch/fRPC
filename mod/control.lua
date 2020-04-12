@@ -62,7 +62,5 @@ script.on_nth_tick(1, function (e)
     end
   end
 
-  if next(sample.values) ~= nil then
-    game.write_file(e.tick .. ".json", game.table_to_json(sample) .. "\n")
-  end
+  game.write_file(e.tick .. ".json", game.table_to_json(sample) .. "\n")
 end)
