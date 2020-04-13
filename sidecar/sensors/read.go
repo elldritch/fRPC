@@ -69,6 +69,9 @@ func LatestTick(fs fs.Filesystem, dir string) (Tick, error) {
 		return 0, fmt.Errorf("sensors.LatestTick: could not read sample directory: %s", err)
 	}
 
+	if len(files) == 0 {
+		return 0, nil
+	}
 	return Tick(files[len(files)-1]), nil
 }
 

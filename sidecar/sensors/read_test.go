@@ -118,3 +118,11 @@ func TestLatestTickDir(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, sensors.Tick(3), tick)
 }
+
+func TestLatestTickEmpty(t *testing.T) {
+	fs := fs.NewMock(map[string][]byte{})
+
+	tick, err := sensors.LatestTick(fs, ".")
+	assert.NoError(t, err)
+	assert.Equal(t, sensors.Tick(0), tick)
+}

@@ -36,3 +36,11 @@ func TestExpiredDir(t *testing.T) {
 	assert.Contains(t, expired, "dir/1.json")
 	assert.Contains(t, expired, "dir/2.json")
 }
+
+func TestExpiredEmpty(t *testing.T) {
+	fs := fs.NewMock(map[string][]byte{})
+
+	expired, err := sensors.Expired(fs, ".", 1)
+	assert.NoError(t, err)
+	assert.Len(t, expired, 0)
+}

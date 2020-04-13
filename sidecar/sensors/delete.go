@@ -32,6 +32,9 @@ func Expired(fs fs.Filesystem, dir string, ttl Ticks) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("sensors.Expired: could not read sample directory: %s", err)
 	}
+	if len(files) == 0 {
+		return nil, nil
+	}
 	latest := files[len(files)-1]
 
 	var expired []int
