@@ -10,3 +10,19 @@ fRPC is a mod that adds RPC capabilities to Factorio. It provides two new buildi
 ```
 sudo docker build -t frpc-factorio:0.0.1 .
 ```
+
+```
+sudo docker run \
+  -d -it \
+  -p 34197:34197/udp \
+  -p 27015:27015/tcp \
+  -p 8000:8000 \
+  --mount type=bind,source="$(pwd)"/data/map-gen-settings.json,target=/factorio/config/map-gen-settings.json \
+  --mount type=bind,source="$(pwd)"/data/map-settings.json,target=/factorio/config/map-settings.json \
+  --mount type=bind,source="$(pwd)"/data/server-settings.json,target=/factorio/config/server-settings.json \
+  -v "$(pwd)"/saves:/factorio/saves \
+  -e ENABLE_SERVER_LOAD_LATEST=false \
+  -e SAVE_NAME=name-of-your-save \
+  --name frpc-factorio \
+  frpc-factorio:0.0.1
+```
