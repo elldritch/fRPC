@@ -18,7 +18,7 @@ func TestFRPCSensorDeleteExpired(t *testing.T) {
 	sensor := sensors.New(sensors.Config{
 		Filesystem: fs,
 		Dir:        ".",
-		TTL:        1,
+		TTL:        sensors.ToDuration(1),
 	})
 
 	err := sensor.DeleteExpired()
