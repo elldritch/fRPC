@@ -51,7 +51,7 @@ func main() {
 	// Implement server.
 	server := buildServer(serverConfig{
 		Clock:      clock.New(),
-		Filesystem: fs.NewDevFS(os.Stderr),
+		Filesystem: fs.New(),
 		TTL:        time.Duration(*ttl) * time.Second,
 		Dir:        *dir,
 	})
