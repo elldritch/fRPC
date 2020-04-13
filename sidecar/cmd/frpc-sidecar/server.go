@@ -158,35 +158,7 @@ func buildServer(config serverConfig) *sensorServer {
 			panic(err)
 		}
 
-		if len(samples) > 0 {
-			earliest := samples[0]
-			if earliest.Tick-since > 0 {
-				// Some samples are missing.
-				data, err := json.Marshal(samplesResponse{
-					Missing: &missingInterval{
-						Start: since,
-						End:   earliest.Tick,
-					},
-					Samples: samples,
-				})
-				if err != nil {
-					panic(err)
-				}
-				w.Write(data)
-				return
-			} else {
-				// No samples are missing.
-				data, err := json.Marshal(samplesResponse{
-					Missing: nil,
-					Samples: samples,
-				})
-				if err != nil {
-					panic(err)
-				}
-				w.Write(data)
-				return
-			}
-		} else {
+		if len(samples) == 0 {
 			// All samples are missing.
 			data, err := json.Marshal(samplesResponse{
 				Missing: &missingInterval{
@@ -200,6 +172,33 @@ func buildServer(config serverConfig) *sensorServer {
 			w.Write(data)
 			return
 		}
+
+		earliest := samples[0]
+		if earliest.Tick-since > 0 {
+			// Some samples are missing.
+			data, err := json.Marshal(samplesResponse{
+				Missing: &missingInterval{
+					Start: since,
+					End:   earliest.Tick,
+				},
+				Samples: samples,
+			})
+			if err != nil {
+				panic(err)
+			}
+			w.Write(data)
+			return
+		}
+
+		// No samples are missing.
+		data, err := json.Marshal(samplesResponse{
+			Missing: nil,
+			Samples: samples,
+		})
+		if err != nil {
+			panic(err)
+		}
+		w.Write(data)
 	})
 
 	return &sensorServer{
