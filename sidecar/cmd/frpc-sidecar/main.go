@@ -45,9 +45,6 @@ func main() {
 			} else {
 				help("")
 			}
-		default:
-			fmt.Fprintln(os.Stderr, `Invalid subcommand. Valid subcommands: "help".`)
-			os.Exit(1)
 		}
 	}
 
