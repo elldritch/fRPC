@@ -13,7 +13,16 @@ func TestUnmarshal(t *testing.T) {
 	sample, err := sensors.Unmarshal([]byte(`{"tick":7996904,"values":[{"network_id":4,"signals":[{"signal":{"type":"item","name":"copper-plate"},"count":1}]}]}`))
 	assert.NoError(t, err)
 	assert.Equal(t, sensors.Tick(7996904), sample.Tick)
+	assert.Len(t, sample.Readings, 1)
 	assert.Equal(t, sensors.Count(1), sample.Readings[4]["copper-plate"])
+}
+
+func TestUnmarshalEmpty(t *testing.T) {
+	// TODO: what happens when ticks get bigger than JavaScript's Number.MAX_SAFE_INTEGER?
+	sample, err := sensors.Unmarshal([]byte(`{"tick":1,"values":{}}`))
+	assert.NoError(t, err)
+	assert.Equal(t, sensors.Tick(1), sample.Tick)
+	assert.Len(t, sample.Readings, 0)
 }
 
 func TestUnmarshalMultipleReadingsSameNetwork(t *testing.T) {

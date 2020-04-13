@@ -19,6 +19,9 @@ type Config struct {
 // An FRPCSensor provides a Sensor implementation.
 type FRPCSensor struct {
 	config Config
+
+	// TODO: sample files are immutable, so we can cache them in-memory to improve
+	// lookup speed if needed.
 }
 
 // New constructs a new *FRPCSensor.

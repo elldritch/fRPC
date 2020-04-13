@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -136,12 +137,34 @@ func ReadFiles(fs fs.Filesystem, files []string) ([]Sample, error) {
 
 // Unmarshal unmarshals a single Sample.
 func Unmarshal(data []byte) (Sample, error) {
-	var sample _Sample
-	err := json.Unmarshal(data, &sample)
+	// Unmarshal into a map.
+	raw := make(map[string]interface{})
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return Sample{}, fmt.Errorf("sensors.Unmarshal: could not unmarshal sample: %s", err)
 	}
 
+	// Handle special case: when a sample has no values, its "values" field is a
+	// map instead of a slice.
+	if reflect.TypeOf(raw["values"]).Kind() == reflect.Map {
+		tick, ok := raw["tick"].(float64)
+		if !ok {
+			return Sample{}, fmt.Errorf("sensors.Unmarshal: malformed sample")
+		}
+		return Sample{
+			Tick:     Tick(tick),
+			Readings: nil,
+		}, nil
+	}
+
+	// Unmarshal into an actual _Sample.
+	var sample _Sample
+	err = json.Unmarshal(data, &sample)
+	if err != nil {
+		return Sample{}, fmt.Errorf("sensors.Unmarshal: could not parse sample: %s", err)
+	}
+
+	// Translate a _Sample into a Sample.
 	readings := make(map[NetworkID]map[SignalID]Count)
 	for _, v := range sample.Values {
 		_, ok := readings[v.NetworkID]
