@@ -62,5 +62,9 @@ script.on_nth_tick(1, function (e)
     end
   end
 
+  -- NOTE: this only works during multiplayer (the server is player index 0). It
+  -- doesn't work for singleplayer because there is no player index 0 in
+  -- singleplayer.
+  -- TODO: make it work in singleplayer.
   game.write_file(e.tick .. ".json", game.table_to_json(sample) .. "\n", false, 0)
 end)

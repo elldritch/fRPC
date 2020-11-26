@@ -3,8 +3,8 @@ module github.com/liftM/fRPC
 go 1.13
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/influxdata/influxdb-client-go/v2 v2.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/prometheus/client_golang v1.8.0
