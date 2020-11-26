@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/liftM/fRPC/sidecar/effects/clock"
 	"github.com/liftM/fRPC/sidecar/effects/fs"
@@ -200,6 +201,8 @@ func buildServer(config serverConfig) *sensorServer {
 		}
 		w.Write(data)
 	})
+
+	r.Handle("/prometheus", promhttp.Handler())
 
 	return &sensorServer{
 		sensor: sensor,

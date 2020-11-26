@@ -23,7 +23,12 @@ type Sample struct {
 // A Sensor implements functionality for reading outputs from a running fRPC
 // instance.
 type Sensor interface {
+	// Since returns up to count samples since a specified tick.
 	Since(tick Tick, count uint) ([]Sample, error)
+	// LatestTick returns the latest tick.
 	LatestTick() (Tick, error)
+	// PerTick registers a callback which is called on every new reading.
+	PerTick(callback func(samples []Sample))
+	// DeleteExpired deletes all expired sensor logs.
 	DeleteExpired() error
 }
