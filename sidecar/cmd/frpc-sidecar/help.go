@@ -54,11 +54,12 @@ GET /tick
 
 	GET /tick
 	{
-		// This is the Unix timestamp corresponding to the tick.
+		// This is the current Unix timestamp.
 		"timestamp": 1586676089,
 
-		// This is the game tick, which measures time from the beginning of the
-		// game.
+		// This is the latest game tick, which measures time from the beginning of
+		// the game. Note a timestamp may be associated with multiple ticks if the
+		// game is paused.
 		"tick": 12345,
 	}
 

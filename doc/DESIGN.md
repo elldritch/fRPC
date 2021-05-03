@@ -14,15 +14,10 @@ Sensors provide an HTTP interface for metrics exported from within Factorio.
 
 Within Factorio, sensors are identified by the ID of the circuit network to which they are connected.
 
-Externally, the HTTP API provides these routes:
+Externally, users can extract these values in two ways:
 
-```
-# List basic information about sensors.
-GET /sensors
-
-# List detailed information about a sensor's current values.
-GET /sensors/:sensor/values
-```
+1. The sidecar provides an HTTP API, which exposes sensor readings at tick-level granularity. See `frpc-sidecar help api` for details.
+2. The sidecar also provides Prometheus-compatible endpoints, for a Prometheus-compatible scraper.
 
 ### Implementation
 
@@ -37,6 +32,10 @@ type Line = Reading[];
 
 type Reading = {
   tick: int;
+  values: Sample[];
+}
+
+type Sample = {
   network_id: int;
   signals: Signal[];
 }
@@ -44,10 +43,14 @@ type Reading = {
 type Signal = {
   signal: {
     type: "item" | "fluid" | "virtual";
-    name?: string;
+    name: string;
   }
   count: int;
 }
 ```
 
-The sidecar reads these log files and updates the current values returned by the HTTP API. It deletes old log files after reading them.
+The sidecar reads these log files and updates the current values returned by the HTTP API. It deletes old log files after their TTLs expire.
+
+## Receivers
+
+Receivers are not yet implemented. It seems like we can implement them as special RCON commands.

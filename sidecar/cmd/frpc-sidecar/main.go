@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/mitchellh/go-homedir"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/liftM/fRPC/sidecar/effects/clock"
 	"github.com/liftM/fRPC/sidecar/effects/fs"
@@ -26,10 +26,6 @@ func main() {
 
 	addr := flag.String("addr", ":8000", "address for HTTP server to listen on")
 	dir := flag.String("dir", defaultDir, "directory containing Factorio sensor logs")
-	influxDBURL := flag.String("influx-db-url", "", "URL to InfluxDB instance")
-	influxToken := flag.String("influx-db-token", "", "authentication token for InfluxDB")
-	influxBucket := flag.String("influx-db-bucket", "", "bucket name for InfluxDB")
-	influxOrg := flag.String("influx-db-org", "", "organization name for InfluxDB")
 	ttl := flag.Int("ttl", 60, "seconds before deleting sensor data")
 
 	flag.Usage = func() {
@@ -63,23 +59,45 @@ func main() {
 		Dir:        *dir,
 	})
 
-	// Start writing to InfluxDB.
-	client := influxdb2.NewClient(*influxDBURL, *influxToken)
-	defer client.Close()
-	influxWrite := client.WriteAPI(*influxOrg, *influxBucket)
-	defer influxWrite.Flush()
+	// Start Prometheus monitoring.
+	gauge := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "frpc",
+			Subsystem: "sensor",
+			Name:      "signal_value",
+		},
+		[]string{
+			"network_id",
+			"signal_name",
+		},
+	)
+	prometheus.MustRegister(gauge)
+
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "frpc",
+			Subsystem: "sensor",
+			Name:      "signal_total",
+		},
+		[]string{
+			"network_id",
+			"signal_name",
+		},
+	)
+	prometheus.MustRegister(counter)
 
 	server.sensor.PerTick(func(samples []sensors.Sample) {
 		for _, sample := range samples {
 			for networkID, signals := range sample.Readings {
 				for signalID, value := range signals {
-					p := influxdb2.NewPoint("frpc_signal_value", map[string]string{
+					gauge.With(prometheus.Labels{
 						"network_id":  strconv.Itoa(int(networkID)),
 						"signal_name": string(signalID),
-					}, map[string]interface{}{
-						"signal_value": int(value),
-					}, time.Now())
-					influxWrite.WritePoint(p)
+					}).Set(float64(value))
+					counter.With(prometheus.Labels{
+						"network_id":  strconv.Itoa(int(networkID)),
+						"signal_name": string(signalID),
+					}).Add(float64(value))
 				}
 			}
 		}
