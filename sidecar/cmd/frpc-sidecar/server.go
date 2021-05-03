@@ -202,7 +202,7 @@ func buildServer(config serverConfig) *sensorServer {
 		w.Write(data)
 	})
 
-	r.Handle("/prometheus", promhttp.Handler())
+	r.Handle("/metrics", promhttp.Handler())
 
 	return &sensorServer{
 		sensor: sensor,

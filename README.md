@@ -27,6 +27,12 @@ sudo docker run \
   frpc-factorio:0.0.1
 ```
 
+<!--
+Use Grafana Cloud
+
+Download agent locally, otherwise you have to forward ports correctly in Docker.
+-->
+
 ```
 docker run \
   -v /tmp/agent:/etc/agent \
@@ -34,3 +40,15 @@ docker run \
   --entrypoint "/bin/agent -config.file=/etc/agent-config/agent.yaml -prometheus.wal-directory=/etc/agent/data" \
   grafana/agent:v0.13.1
 ```
+
+<!--
+
+TODO:
+
+- Lua mod: Let player enter and specify network name per sensor
+  - Don't need to map signal network IDs to meanings
+  - Let people purposely name two sensors to be on same "channel", with union semantics
+- Separate gauge and counter in game (makes for confusing graphs otherwise)
+- Make mod work in singleplayer (see control.lua note)
+- Add nicer sprites
+-->
