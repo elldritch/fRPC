@@ -26,3 +26,11 @@ sudo docker run \
   --name frpc-factorio \
   frpc-factorio:0.0.1
 ```
+
+```
+docker run \
+  -v /tmp/agent:/etc/agent \
+  -v $(pwd)/path/to/agent/config.yml:/etc/agent-config/agent.yaml \
+  --entrypoint "/bin/agent -config.file=/etc/agent-config/agent.yaml -prometheus.wal-directory=/etc/agent/data" \
+  grafana/agent:v0.13.1
+```

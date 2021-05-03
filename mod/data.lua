@@ -1,3 +1,4 @@
+-- TODO: Need another base - lamps turn themselves off now with circuit input.
 local sensor = table.deepcopy(data.raw["lamp"]["small-lamp"])
 
 sensor.name = "frpc-sensor"
